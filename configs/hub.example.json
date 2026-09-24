@@ -1,0 +1,78 @@
+{
+  "listen": ":8080",
+  "db_path": "data/sentinel.db",
+  "data_dir": "data/agents",
+
+  "wecom_webhook": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY",
+  "dedup_window": 300,
+  "recover_hold": 60,
+
+  "probes": [
+    {
+      "id": "web-home",
+      "plugin": "http",
+      "interval": 30,
+      "params": { "url": "https://example.com", "timeout": 5 },
+      "rule": { "metric": "probe_success", "op": "<", "threshold": 1, "duration": 60, "recover_hold": 60 }
+    },
+    {
+      "id": "db-3306",
+      "plugin": "tcp",
+      "interval": 30,
+      "params": { "host": "127.0.0.1", "port": 3306, "timeout": 3 },
+      "rule": { "metric": "probe_success", "op": "<", "threshold": 1, "duration": 90 }
+    },
+    {
+      "id": "gateway",
+      "plugin": "ping",
+      "interval": 60,
+      "params": { "host": "192.168.1.1", "count": 2, "timeout": 3 },
+      "rule": { "metric": "probe_success", "op": "<", "threshold": 1, "duration": 120 }
+    }
+  ],
+
+  "agents": [
+    {
+      "agent_id": "node-1",
+      "tasks": [
+        {
+          "id": "cpu",
+          "plugin": "cpu",
+          "interval": 30,
+          "params": {},
+          "rule": { "metric": "cpu_usage_percent", "op": ">", "threshold": 90, "duration": 120, "recover_hold": 120 }
+        },
+        {
+          "id": "mem",
+          "plugin": "mem",
+          "interval": 30,
+          "params": {},
+          "rule": { "metric": "mem_usage_percent", "op": ">", "threshold": 90, "duration": 120 }
+        },
+        {
+          "id": "disk-root",
+          "plugin": "disk",
+          "interval": 60,
+          "params": { "path": "/" },
+          "rule": { "metric": "disk_usage_percent", "op": ">", "threshold": 85, "duration": 0 }
+        },
+        {
+          "id": "nginx-alive",
+          "plugin": "proc",
+          "interval": 30,
+          "params": { "name": "nginx" },
+          "rule": { "metric": "proc_alive", "op": "<", "threshold": 1, "duration": 60 }
+        }
+      ]
+    }
+  ],
+
+  "silences": [
+    {
+      "task_ids": [],
+      "start": "2026-10-01T00:00:00+08:00",
+      "end": "2026-10-08T00:00:00+08:00",
+      "reason": "国庆维护窗口（示例）"
+    }
+  ]
+}
